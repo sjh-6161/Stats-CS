@@ -12,15 +12,6 @@
  - throw position
  - air time
  - players flashes / damage
-- [ ] Add positional data to DB
- - [ ] damage - Attacker and Victim positions
- - [ ] kill - attacker and victim positions
- - [ ] weapon_fire - player position and direction
-- [ ] Add ticks for events in DB
- - damage
- - kill
- - message
- - weapon_fire
 - [ ] Create visualizations for kills
  - [ ] Per person / team / weapon
 
@@ -34,6 +25,12 @@
  - [ ] Win rates for different setups, in different types of buys, etc
 
 ### Done ✓
-- [x] 
 - [x] Add damages table to DB
 - [x] Add weapon fires table to DB
+- [x] Add positional data to DB
+ - [x] damage - Attacker and Victim positions
+ - [x] kill - attacker and victim positions
+ - [x] weapon_fire - player position and direction
+- [x] Add ticks for events in DB
+ - [x] kill
+ - [x] message

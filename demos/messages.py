@@ -20,7 +20,8 @@ def parse(rounds: List[Round], match_id: UUID, parser: DemoParser):
             player_id=row['user_steamid'],
             round_id=round_id,
             match_id=match_id,
-            message=row['chat_message']
+            message=row['chat_message'],
+            tick=row['tick']
         ))
 
     return message_objects

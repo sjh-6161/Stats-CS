@@ -162,84 +162,6 @@ class Match(DbClass):
                 tournament varchar(500) NOT NULL
             );
             """
-    
-# class BasicTeamStats(DbClass):
-#     team_id: UUID
-#     match_id: UUID
-#     round_wins: int
-#     round_losses: int
-
-#     def __init__(
-#         self,
-#         team_id: UUID,
-#         match_id: UUID,
-#         round_wins: int,
-#         round_losses: int,
-#         id: Optional[UUID] = None,
-#     ) -> None:
-#         self.team_id = team_id
-#         self.match_id = match_id
-#         self.round_wins = round_wins
-#         self.round_losses = round_losses
-#         super().__init__(id)
-
-#     def to_create() -> str:
-#         return """
-#             CREATE TABLE IF NOT EXISTS basic_team_stats (
-#                 id uuid PRIMARY KEY,
-#                 team_id uuid NOT NULL REFERENCES team(id),
-#                 match_id uuid NOT NULL REFERENCES match(id),
-#                 round_wins int NOT NULL,
-#                 round_losses int NOT NULL
-#             );
-#             """
-
-# class BasicPlayerStats(DbClass):
-#     player_id: UUID
-#     team_id: UUID
-#     match_id: UUID
-#     rounds: int
-#     kills: int
-#     deaths: int
-#     assists: int
-#     damage: int
-
-#     def __init__(
-#         self,
-#         player_id: UUID,
-#         team_id: UUID,
-#         match_id: UUID,
-#         rounds: int,
-#         kills: int,
-#         deaths: int,
-#         assists: int,
-#         damage: int,
-#         id: Optional[UUID] = None,
-#     ) -> None:
-#         self.player_id = player_id
-#         self.team_id = team_id
-#         self.match_id = match_id
-#         self.rounds = rounds
-#         self.kills = kills
-#         self.deaths = deaths
-#         self.assists = assists
-#         self.damage = damage
-#         super().__init__(id)
-
-#     def to_create() -> str:
-#         return """
-#             CREATE TABLE IF NOT EXISTS basic_player_stats (
-#                 id uuid PRIMARY KEY,
-#                 player_id uuid NOT NULL REFERENCES player(id),
-#                 team_id uuid NOT NULL REFERENCES team(id),
-#                 match_id uuid NOT NULL REFERENCES match(id),
-#                 rounds int NOT NULL,
-#                 kills int NOT NULL,
-#                 deaths int NOT NULL,
-#                 assists int NOT NULL,
-#                 damage int NOT NULL
-#             );
-#             """
 
 class Round(DbClass):
     match_id: UUID
@@ -310,6 +232,12 @@ class Kill(DbClass):
     assister_id: str
     attacker_id: str
     victim_id: str
+    attacker_x: float
+    attacker_y: float
+    attacker_z: float
+    victim_x: float
+    victim_y: float
+    victim_z: float
     assistedflash: bool
     attackerblind: bool
     attackerinair: bool
@@ -330,6 +258,7 @@ class Kill(DbClass):
     ct_alive: int
     trade: bool
     traded: bool
+    tick: int
 
     def __init__(
         self,
@@ -338,6 +267,12 @@ class Kill(DbClass):
         assister_id: str,
         attacker_id: str,
         victim_id: str,
+        attacker_x: float,
+        attacker_y: float,
+        attacker_z: float,
+        victim_x: float,
+        victim_y: float,
+        victim_z: float,
         assistedflash: bool,
         attackerblind: bool,
         attackerinair: bool,
@@ -358,6 +293,7 @@ class Kill(DbClass):
         ct_alive: int,
         trade: bool,
         traded: bool,
+        tick: int,
         id: Optional[UUID] = None,
     ) -> None:
         self.match_id = match_id
@@ -365,6 +301,12 @@ class Kill(DbClass):
         self.assister_id = assister_id
         self.attacker_id = attacker_id
         self.victim_id = victim_id
+        self.attacker_x = attacker_x
+        self.attacker_y = attacker_y
+        self.attacker_z = attacker_z
+        self.victim_x = victim_x
+        self.victim_y = victim_y
+        self.victim_z = victim_z
         self.assistedflash = assistedflash
         self.attackerblind = attackerblind
         self.attackerinair = attackerinair
@@ -385,6 +327,7 @@ class Kill(DbClass):
         self.ct_alive = ct_alive
         self.trade = trade
         self.traded = traded
+        self.tick = tick
         super().__init__(id)
 
     def to_create() -> str:
@@ -393,9 +336,15 @@ class Kill(DbClass):
                 id uuid PRIMARY KEY,
                 match_id uuid NOT NULL REFERENCES match(id),
                 round_id uuid NOT NULL REFERENCES round(id),
-                assister_id VARCHAR(500) REFERENCES player(steam_id),
-                attacker_id VARCHAR(500) REFERENCES player(steam_id),
-                victim_id VARCHAR(500) REFERENCES player(steam_id),
+                assister_id VARCHAR(32) REFERENCES player(steam_id),
+                attacker_id VARCHAR(32) REFERENCES player(steam_id),
+                victim_id VARCHAR(32) REFERENCES player(steam_id),
+                attacker_x float,
+                attacker_y float,
+                attacker_z float,
+                victim_x float NOT NULL,
+                victim_y float NOT NULL,
+                victim_z float NOT NULL,
                 assistedflash bool NOT NULL,
                 attackerblind bool NOT NULL,
                 attackerinair bool NOT NULL,
@@ -415,7 +364,8 @@ class Kill(DbClass):
                 t_alive int NOT NULL,
                 ct_alive int NOT NULL,
                 trade bool NOT NULL,
-                traded bool NOT NULL
+                traded bool NOT NULL,
+                tick int NOT NULL
             );
         """
 
@@ -424,6 +374,12 @@ class Damage(DbClass):
     round_id: UUID
     attacker_id: str
     victim_id: str
+    attacker_x: float
+    attacker_y: float
+    attacker_z: float
+    victim_x: float
+    victim_y: float
+    victim_z: float
     armor: int
     health: int
     dmg_armor: int
@@ -440,6 +396,12 @@ class Damage(DbClass):
         round_id: UUID,
         attacker_id: str,
         victim_id: str,
+        attacker_x: float,
+        attacker_y: float,
+        attacker_z: float,
+        victim_x: float,
+        victim_y: float,
+        victim_z: float,
         armor: int,
         health: int,
         dmg_armor: int,
@@ -455,6 +417,12 @@ class Damage(DbClass):
         self.round_id = round_id
         self.attacker_id = attacker_id
         self.victim_id = victim_id
+        self.attacker_x = attacker_x
+        self.attacker_y = attacker_y
+        self.attacker_z = attacker_z
+        self.victim_x = victim_x
+        self.victim_y = victim_y
+        self.victim_z = victim_z
         self.armor = armor
         self.health = health
         self.dmg_armor = dmg_armor
@@ -472,8 +440,14 @@ class Damage(DbClass):
                 id uuid PRIMARY KEY,
                 match_id uuid NOT NULL REFERENCES match(id),
                 round_id uuid NOT NULL REFERENCES round(id),
-                attacker_id VARCHAR(500) REFERENCES player(steam_id),
-                victim_id VARCHAR(500) NOT NULL REFERENCES player(steam_id),
+                attacker_id VARCHAR(32) REFERENCES player(steam_id),
+                victim_id VARCHAR(32) NOT NULL REFERENCES player(steam_id),
+                attacker_x float,
+                attacker_y float,
+                attacker_z float,
+                victim_x float NOT NULL,
+                victim_y float NOT NULL,
+                victim_z float NOT NULL,
                 armor int NOT NULL,
                 health int NOT NULL,
                 dmg_armor int NOT NULL,
@@ -533,6 +507,11 @@ class WeaponFire(DbClass):
     match_id: UUID
     round_id: UUID
     attacker_id: str
+    attacker_x: float
+    attacker_y: float
+    attacker_z: float
+    attacker_pitch: float
+    attacker_yaw: float
     attacker_team: str
     tick: int
     weapon: str
@@ -543,6 +522,11 @@ class WeaponFire(DbClass):
         match_id: UUID,
         round_id: UUID,
         attacker_id: str,
+        attacker_x: float,
+        attacker_y: float,
+        attacker_z: float,
+        attacker_pitch: float,
+        attacker_yaw: float,
         attacker_team: str,
         tick: int,
         weapon: str,
@@ -552,6 +536,11 @@ class WeaponFire(DbClass):
         self.match_id = match_id
         self.round_id = round_id
         self.attacker_id = attacker_id
+        self.attacker_x = attacker_x
+        self.attacker_y = attacker_y
+        self.attacker_z = attacker_z
+        self.attacker_pitch = attacker_pitch
+        self.attacker_yaw = attacker_yaw
         self.attacker_team = attacker_team
         self.tick = tick
         self.weapon = weapon
@@ -564,7 +553,12 @@ class WeaponFire(DbClass):
                 id uuid PRIMARY KEY,
                 match_id uuid NOT NULL REFERENCES match(id),
                 round_id uuid NOT NULL REFERENCES round(id),
-                attacker_id VARCHAR(500) REFERENCES player(steam_id),
+                attacker_id VARCHAR(32) REFERENCES player(steam_id),
+                attacker_x float NOT NULL,
+                attacker_y float NOT NULL,
+                attacker_z float NOT NULL,
+                attacker_pitch float NOT NULL,
+                attacker_yaw float NOT NULL,
                 attacker_team VARCHAR(255) NOT NULL,
                 tick int NOT NULL,
                 weapon VARCHAR(255) NOT NULL,
@@ -620,6 +614,7 @@ class Message(DbClass):
     round_id: UUID
     match_id: UUID
     message: str
+    tick: int
 
     def __init__(
         self,
@@ -627,22 +622,25 @@ class Message(DbClass):
         round_id: UUID,
         match_id: UUID,
         message: str,
+        tick: int,
         id: Optional[UUID] = None,
     ) -> None:
         self.player_id=player_id
         self.round_id=round_id
         self.match_id=match_id
         self.message=message
+        self.tick = tick
         super().__init__(id)
         
     def to_create() -> str:
         return """
             CREATE TABLE IF NOT EXISTS message (
                 id uuid PRIMARY KEY,
-                player_id VARCHAR(500) NOT NULL REFERENCES player(steam_id),
+                player_id VARCHAR(32) NOT NULL REFERENCES player(steam_id),
                 round_id uuid NOT NULL REFERENCES round(id),
                 match_id uuid NOT NULL REFERENCES match(id),
-                message VARCHAR(255)
+                message VARCHAR(255),
+                tick int NOT NULL
             );
         """
     
@@ -653,7 +651,7 @@ class DbConnection:
 
         self.__connection = psycopg2.connect(
             host=os.getenv("POSTGRES_HOST"),
-            port=5433,
+            port=os.getenv("POSTGRES_PORT"),
             database=os.getenv("POSTGRES_DATABASE"),
             user=os.getenv("POSTGRES_USER"),
             password=os.getenv("POSTGRES_PASSWORD"),
@@ -663,8 +661,6 @@ class DbConnection:
             Team.to_create(),
             Player.to_create(),
             Match.to_create(),
-            # BasicTeamStats.to_create(),
-            # BasicPlayerStats.to_create(),
             Round.to_create(),
             TeamDefault.to_create(),
             Kill.to_create(),

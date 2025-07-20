@@ -2,7 +2,7 @@ from demoparser2 import DemoParser
 from data import *
 
 def parse(rounds: List[Round], match_id: UUID, parser: DemoParser):
-    hurts_df = parser.parse_event(event_name='player_hurt', player=['team_name'])
+    hurts_df = parser.parse_event(event_name='player_hurt', player=['team_name', "X", "Y", "Z"])
 
     damages = []
     
@@ -23,6 +23,12 @@ def parse(rounds: List[Round], match_id: UUID, parser: DemoParser):
             round_id=round_id,
             attacker_id=attacker_id,
             victim_id=row['user_steamid'],
+            attacker_x=row['attacker_X'],
+            attacker_y=row['attacker_Y'],
+            attacker_z=row['attacker_Z'],
+            victim_x=row['user_X'],
+            victim_y=row['user_Y'],
+            victim_z=row['user_Z'],
             armor=row['armor'],
             health=row['health'],
             dmg_armor=row['dmg_armor'],

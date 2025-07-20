@@ -45,7 +45,7 @@ WEAPON_NAME_MAPPING = {
 }
 
 def parse(rounds: List[Round], match_id: UUID, parser: DemoParser):
-    deaths_df = parser.parse_event("player_death", player=["active_weapon_name", "team_name"])
+    deaths_df = parser.parse_event("player_death", player=["active_weapon_name", "team_name", "X", "Y", "Z"])
     ticks_df = parser.parse_ticks(wanted_props=["is_alive", "team_name"], ticks=deaths_df["tick"].to_list())
 
     alive_dict = {}
@@ -96,6 +96,12 @@ def parse(rounds: List[Round], match_id: UUID, parser: DemoParser):
             assister_id=assister_id,
             attacker_id=attacker_id,
             victim_id=row['user_steamid'],
+            attacker_x=row['attacker_X'],
+            attacker_y=row['attacker_Y'],
+            attacker_z=row['attacker_Z'],
+            victim_x=row['user_X'],
+            victim_y=row['user_Y'],
+            victim_z=row['user_Z'],
             assistedflash=row['assistedflash'],
             attackerblind=row['attackerblind'],
             attackerinair=row['attackerinair'],
@@ -115,7 +121,8 @@ def parse(rounds: List[Round], match_id: UUID, parser: DemoParser):
             t_alive=alive_dict[row['tick']]["TERRORIST"],
             ct_alive=alive_dict[row['tick']]["CT"],
             trade=trade,
-            traded=traded
+            traded=traded,
+            tick=row['tick']
         ))
 
     return kills
