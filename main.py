@@ -26,7 +26,9 @@ if __name__ == "__main__":
     # Connect to postgres database. Initializes tables in database if needed
     connection = DbConnection()
 
-    parse_many_demos("Season 17", "D:\CSC\Season 17", connection)
-    # parse_many_demos("Austin Major Stage 2", "D:\HLTV\Austin Major Stage 2 2025", connection)
-    # parse_many_demos("Austin Major Stage 3", "D:\HLTV\Austin Major Stage 3 2025", connection)
-    # parse_many_demos("Austin Major Playoffs", "D:\HLTV\Austin Major Playoffs 2025", connection)
+    # parse_many_demos("Season 17", "D:\CSC\Season 17", connection)
+
+    parse_many_demos("Austin Major Stage 1", "D:\HLTV\Austin Major Stage 1 2025", connection)
+    parse_many_demos("Austin Major Stage 2", "D:\HLTV\Austin Major Stage 2 2025", connection)
+    parse_many_demos("Austin Major Stage 3", "D:\HLTV\Austin Major Stage 3 2025", connection)
+    parse_many_demos("Austin Major Playoffs", "D:\HLTV\Austin Major Playoffs 2025", connection)
