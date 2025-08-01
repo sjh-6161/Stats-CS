@@ -644,6 +644,77 @@ class Message(DbClass):
             );
         """
     
+class Grenade(DbClass):
+    player_id: str
+    team_id: UUID
+    round_id: UUID
+    match_id: UUID
+    team: str
+    grenade_type: str
+    start_tick: int
+    start_x: float
+    start_y: float
+    start_z: float
+    end_tick: int
+    end_x: float
+    end_y: float
+    end_z: float
+
+    def __init__(
+        self,
+        player_id: str,
+        team_id: UUID,
+        round_id: UUID,
+        match_id: UUID,
+        team: str,
+        grenade_type: str,
+        start_tick: int,
+        start_x: float,
+        start_y: float,
+        start_z: float,
+        end_tick: int,
+        end_x: float,
+        end_y: float,
+        end_z: float,
+        id: Optional[UUID] = None,
+    ) -> None:
+        self.player_id = player_id
+        self.team_id = team_id
+        self.round_id = round_id
+        self.match_id = match_id
+        self.team = team
+        self.grenade_type = grenade_type
+        self.start_tick = start_tick
+        self.start_x = start_x
+        self.start_y = start_y
+        self.start_z = start_z
+        self.end_tick = end_tick
+        self.end_x = end_x
+        self.end_y = end_y
+        self.end_z = end_z
+        super().__init__(id)
+        
+    def to_create() -> str:
+        return """
+            CREATE TABLE IF NOT EXISTS grenade (
+                id uuid PRIMARY KEY,
+                player_id VARCHAR(32) NOT NULL REFERENCES player(steam_id),
+                team_id uuid NOT NULL REFERENCES team(id),
+                round_id uuid NOT NULL REFERENCES round(id),
+                match_id uuid NOT NULL REFERENCES match(id),
+                team VARCHAR(32) NOT NULL,
+                grenade_type VARCHAR(32) NOT NULL,
+                start_tick int NOT NULL,
+                start_x float NOT NULL,
+                start_y float NOT NULL,
+                start_z float NOT NULL,
+                end_tick int NOT NULL,
+                end_x float NOT NULL,
+                end_y float NOT NULL,
+                end_z float NOT NULL
+            );
+        """
+    
 class DbConnection:
     def __init__(self) -> None:
         # Enable UUIDS
@@ -667,6 +738,7 @@ class DbConnection:
             Buy.to_create(),
             Damage.to_create(),
             WeaponFire.to_create(),
+            Grenade.to_create(),
             Message.to_create(),
             TournamentTeam.to_create(),
         ]

@@ -15,6 +15,7 @@ if __name__ == "__main__":
     # drop table damage;
     # drop table team_default;
     # drop table weapon_fire;
+    # drop table grenade;
     # drop table kill;
     # drop table message;
     # drop table tournament_team;
@@ -27,6 +28,13 @@ if __name__ == "__main__":
     connection = DbConnection()
 
     # parse_many_demos("Season 17", "D:\CSC\Season 17", connection)
+
+    # parse_many_demos("S17 Recruit Combines", "D:\CSC\Season 17 Combines\Recruit", connection)
+    # parse_many_demos("S17 Prospect Combines", "D:\CSC\Season 17 Combines\Prospect", connection)
+    # parse_many_demos("S17 Contender Combines", "D:\CSC\Season 17 Combines\Contender", connection)
+    # parse_many_demos("S17 Challenger Combines", "D:\CSC\Season 17 Combines\Challenger", connection)
+    # parse_many_demos("S17 Elite Combines", "D:\CSC\Season 17 Combines\Elite", connection)
+    # parse_many_demos("S17 Premier Combines", "D:\CSC\Season 17 Combines\Premier", connection)
 
     parse_many_demos("Austin Major Stage 1", "D:\HLTV\Austin Major Stage 1 2025", connection)
     parse_many_demos("Austin Major Stage 2", "D:\HLTV\Austin Major Stage 2 2025", connection)
