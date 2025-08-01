@@ -61,8 +61,8 @@ if __name__ == "__main__":
     intercept_df = pd.DataFrame(columns=categories, index=categories)
 
     # Create X and Y lists, where X is the distance for each kill and Y is whether an AK was the winner or loser
-    for winner in ['sniper']:
-        for loser in ['smg']:
+    for winner in categories:
+        for loser in categories:
             if winner == loser: continue
 
             dists = []
@@ -85,16 +85,19 @@ if __name__ == "__main__":
             intercept_df.loc[loser, winner] = clf.intercept_[0]
             coef_df.loc[loser, winner] = clf.coef_[0][0]
 
-            plt.scatter(dists, results, alpha=0.1)
-            plt.scatter(dists, clf.predict_proba(np.array(dists).reshape(-1, 1))[:, 1])
-            plt.xlabel("Distance (In game units)")
-            plt.ylabel("AWP vs SMG Win %")
-            plt.show()
+            # plt.scatter(dists, results, alpha=0.1)
+            # plt.scatter(dists, clf.predict_proba(np.array(dists).reshape(-1, 1))[:, 1])
+            # plt.xlabel("Distance (In game units)")
+            # plt.ylabel("AWP vs SMG Win %")
+            # plt.show()
 
-            exit(0)
+            # exit(0)
 
     print(coef_df)
     print(intercept_df)
+
+    duels_df = pd.read_csv("./models/duels_distances_rec_c17.csv")
+
 
     # {"player": [kills, deaths, expected kills]}
     player_stats = {}
