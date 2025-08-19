@@ -44,8 +44,10 @@ WEAPON_NAME_MAPPING = {
     "SSG 08": "ssg08"
 }
 
-def parse(rounds: List[Round], match_id: UUID, parser: DemoParser):
-    deaths_df = parser.parse_event("player_death", player=["active_weapon_name", "team_name", "X", "Y", "Z"])
+def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, parser: DemoParser):
+    team_uuids[None] = None
+
+    deaths_df = parser.parse_event("player_death", player=["active_weapon_name", "team_name", "team_clan_name", "X", "Y", "Z"])
     ticks_df = parser.parse_ticks(wanted_props=["is_alive", "team_name"], ticks=deaths_df["tick"].to_list())
 
     alive_dict = {}
@@ -96,6 +98,9 @@ def parse(rounds: List[Round], match_id: UUID, parser: DemoParser):
             assister_id=assister_id,
             attacker_id=attacker_id,
             victim_id=row['user_steamid'],
+            attacker_team_id=team_uuids[row['attacker_team_clan_name']],
+            assister_team_id=team_uuids[row['assister_team_clan_name']],
+            victim_team_id=team_uuids[row['user_team_clan_name']],
             attacker_x=row['attacker_X'],
             attacker_y=row['attacker_Y'],
             attacker_z=row['attacker_Z'],

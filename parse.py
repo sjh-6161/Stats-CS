@@ -2,7 +2,7 @@ import os
 import traceback
 from demoparser2 import DemoParser
 from data import DbConnection, Team, Player, Match, UUID, TournamentTeam
-from demos import basic_team_stats, basic_player_stats, kills, rounds, buys, messages, damages, weapon_fires, defaults, grenades
+from demos import basic_team_stats, basic_player_stats, kills, rounds, buys, messages, damages, weapon_fires, defaults, grenades, plants
 
 
 parser_version = 1
@@ -137,11 +137,12 @@ def parse_many_demos(tournament: str, folder_path: str, connection: DbConnection
 
             # Parse rounds
             round_objects = rounds.parse(team_uuids, match_id, parser)
+            plant_objects = plants.parse(round_objects, match_id, parser)
 
             default_objects  = defaults.parse(round_objects, team_uuids, match_id, match.map, parser)
 
             # Parse kills
-            kill_objects = kills.parse(round_objects, match_id, parser)
+            kill_objects = kills.parse(round_objects, team_uuids, match_id, parser)
             # Parse round eq vals and balances
             buy_objects = buys.parse(round_objects, team_uuids, match_id, parser)
 
@@ -158,6 +159,7 @@ def parse_many_demos(tournament: str, folder_path: str, connection: DbConnection
             connection.insert_many(players)
             connection.insert(match)
             connection.insert_many(round_objects)
+            connection.insert_many(plant_objects)
             connection.insert_many(default_objects)
             connection.insert_many(kill_objects)
             connection.insert_many(buy_objects)

@@ -226,12 +226,58 @@ class Round(DbClass):
             );
             """
 
+class Plant(DbClass):
+    match_id: UUID
+    round_id: UUID
+    tick: int
+    site: str
+    x: float
+    y: float
+    z: float
+
+    def __init__(
+        self,
+        match_id: UUID,
+        round_id: UUID,
+        tick: int,
+        site: str,
+        x: float,
+        y: float,
+        z: float,
+        id: Optional[UUID] = None,
+    ) -> None:
+        self.match_id = match_id
+        self.round_id = round_id
+        self.tick = tick
+        self.site = site
+        self.x = x
+        self.y = y
+        self.z = z
+        super().__init__(id)
+
+    def to_create() -> str:
+        return """
+            CREATE TABLE IF NOT EXISTS plant (
+                id uuid PRIMARY KEY,
+                match_id uuid NOT NULL REFERENCES match(id),
+                round_id uuid NOT NULL REFERENCES round(id),
+                tick int NOT NULL,
+                site VARCHAR(2) NOT NULL,
+                x float NOT NULL,
+                y float NOT NULL,
+                z float NOT NULL
+            );
+            """
+
 class Kill(DbClass):
     match_id: UUID
     round_id: UUID
     assister_id: str
     attacker_id: str
     victim_id: str
+    attacker_team_id: UUID
+    assister_team_id: UUID
+    victim_team_id: UUID
     attacker_x: float
     attacker_y: float
     attacker_z: float
@@ -267,6 +313,9 @@ class Kill(DbClass):
         assister_id: str,
         attacker_id: str,
         victim_id: str,
+        attacker_team_id: UUID,
+        assister_team_id: UUID,
+        victim_team_id: UUID,
         attacker_x: float,
         attacker_y: float,
         attacker_z: float,
@@ -301,6 +350,9 @@ class Kill(DbClass):
         self.assister_id = assister_id
         self.attacker_id = attacker_id
         self.victim_id = victim_id
+        self.attacker_team_id = attacker_team_id
+        self.assister_team_id = assister_team_id
+        self.victim_team_id = victim_team_id
         self.attacker_x = attacker_x
         self.attacker_y = attacker_y
         self.attacker_z = attacker_z
@@ -339,6 +391,9 @@ class Kill(DbClass):
                 assister_id VARCHAR(32) REFERENCES player(steam_id),
                 attacker_id VARCHAR(32) REFERENCES player(steam_id),
                 victim_id VARCHAR(32) REFERENCES player(steam_id),
+                attacker_team_id uuid REFERENCES team(id),
+                assister_team_id uuid REFERENCES team(id),
+                victim_team_id uuid NOT NULL REFERENCES team(id),
                 attacker_x float,
                 attacker_y float,
                 attacker_z float,
@@ -741,6 +796,7 @@ class DbConnection:
             Grenade.to_create(),
             Message.to_create(),
             TournamentTeam.to_create(),
+            Plant.to_create(),
         ]
 
         # Create tables if they don't exist

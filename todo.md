@@ -6,7 +6,7 @@
 - [ ] GGs per game
 
 ### Code Ideas
-- [ ] Add util table to DB
+- [x] Add util table to DB
  - grenade type
  - pop position
  - throw position
@@ -14,7 +14,7 @@
  - players flashes / damage
 - [ ] Create visualizations for kills
  - [ ] Per person / team / weapon
-- [ ] Add bomb plants table
+- [x] Add bomb plants table
 
 ### Bug Fixes
 - [ ] Trade / traded columns in kill table don't lineup
