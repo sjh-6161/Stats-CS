@@ -1,12 +1,13 @@
 from demoparser2 import DemoParser
 from data import *
+from pandas import DataFrame
 
-def parse(rounds: List[Round], match_id: UUID, parser: DemoParser):
-    hurts_df = parser.parse_event(event_name='player_hurt', player=['team_name', "X", "Y", "Z"])
+def parse(rounds: List[Round], match_id: UUID, player_hurt_df: DataFrame):
+    # hurts_df = parser.parse_event(event_name='player_hurt', player=['team_name', "X", "Y", "Z"])
 
     damages = []
     
-    for _, row in hurts_df.iterrows():
+    for _, row in player_hurt_df.iterrows():
         round_id = None
         for round in rounds:
             if row['tick'] > round.freeze_time_end_tick:

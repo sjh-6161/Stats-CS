@@ -1,5 +1,6 @@
 from demoparser2 import DemoParser
 from data import *
+from pandas import DataFrame
 
 round_end_reasons = {
     0: "StillInProgress",
@@ -25,16 +26,16 @@ round_end_reasons = {
     20: "CTsReachedHostage",
 }
 
-def parse(demo_teams: dict, match_id: UUID, parser: DemoParser):
-    freeze_time_end_df = parser.parse_event("round_freeze_end", other=["team_clan_name", "team_rounds_total", "round_win_reason", "round_in_progress", "is_warmup_period"])
-    round_end_df = parser.parse_event("round_officially_ended", other=["team_clan_name", "team_rounds_total", "round_win_reason", "round_in_progress"])
-    match_end_df = parser.parse_event("cs_win_panel_match", other=["team_clan_name", "team_rounds_total", "round_win_reason", "round_in_progress"])
+def parse(demo_teams: dict, match_id: UUID, round_freeze_end_df: DataFrame, round_officially_ended_df: DataFrame, cs_win_panel_match_df: DataFrame):
+    # freeze_time_end_df = parser.parse_event("round_freeze_end", other=["team_clan_name", "team_rounds_total", "round_win_reason", "round_in_progress", "is_warmup_period"])
+    # round_end_df = parser.parse_event("round_officially_ended", other=["team_clan_name", "team_rounds_total", "round_win_reason", "round_in_progress"])
+    # match_end_df = parser.parse_event("cs_win_panel_match", other=["team_clan_name", "team_rounds_total", "round_win_reason", "round_in_progress"])
 
     rounds: List[Round] = []
 
     parsed_ticks = []
     
-    for _, row in freeze_time_end_df.iterrows():
+    for _, row in round_freeze_end_df.iterrows():
         if row['tick'] in parsed_ticks or row['is_warmup_period']:
             continue
 
@@ -55,7 +56,7 @@ def parse(demo_teams: dict, match_id: UUID, parser: DemoParser):
             losing_team_id=UUID,
         ))
 
-    for _, row in round_end_df.iterrows():
+    for _, row in round_officially_ended_df.iterrows():
         for i in range(len(rounds)):
             if row['tick'] > rounds[i].freeze_time_end_tick and rounds[i].end_official_tick == 0:
                 rounds[i].end_official_tick = row['tick']
@@ -79,8 +80,8 @@ def parse(demo_teams: dict, match_id: UUID, parser: DemoParser):
                 break
 
               
-    if len(match_end_df) > 0:
-        for _, row in match_end_df.iterrows():
+    if len(cs_win_panel_match_df) > 0:
+        for _, row in cs_win_panel_match_df.iterrows():
             for i in range(len(rounds)):
                 if row['tick'] > rounds[i].freeze_time_end_tick and rounds[i].end_official_tick == 0:
                     rounds[i].end_official_tick = row['tick']

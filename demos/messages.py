@@ -1,14 +1,15 @@
 from demoparser2 import DemoParser
 from data import *
+from pandas import DataFrame
 
-def parse(rounds: List[Round], match_id: UUID, parser: DemoParser):
-    messages = parser.parse_event("chat_message")
+def parse(rounds: List[Round], match_id: UUID, chat_message_df: DataFrame):
+    # messages = parser.parse_event("chat_message")
 
     message_objects = []
 
-    if isinstance(messages, list): return []
+    if isinstance(chat_message_df, list): return []
 
-    for _, row in messages.iterrows():
+    for _, row in chat_message_df.iterrows():
         round_id = None
         for round in rounds:
             if row['tick'] > round.freeze_time_end_tick:

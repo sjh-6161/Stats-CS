@@ -1,14 +1,15 @@
 from demoparser2 import DemoParser
 from data import *
+from pandas import DataFrame
 
-def parse(rounds: List[Round], demo_teams: dict,  match_id: UUID, parser: DemoParser):
-    ticks = parser.parse_event("round_freeze_end")["tick"].to_list()
+def parse(rounds: List[Round], demo_teams: dict,  match_id: UUID, freeze_time_end_df: DataFrame):
+    # ticks = parser.parse_event("round_freeze_end")["tick"].to_list()
 
-    df = parser.parse_ticks(["current_equip_value", "balance", 'team_clan_name', 'team_name'], ticks=ticks)
+    # df = parser.parse_ticks(["current_equip_value", "balance", 'team_clan_name', 'team_name'], ticks=ticks)
 
     buys = []
 
-    for _, row in df.iterrows():
+    for _, row in freeze_time_end_df.iterrows():
         round_id = ""
 
         for round in rounds:

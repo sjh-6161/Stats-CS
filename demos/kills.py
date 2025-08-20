@@ -1,5 +1,6 @@
 from demoparser2 import DemoParser
 from data import *
+from pandas import DataFrame
 
 WEAPON_NAME_MAPPING = {
     "Smoke Grenade": "smokegrenade",
@@ -44,15 +45,15 @@ WEAPON_NAME_MAPPING = {
     "SSG 08": "ssg08"
 }
 
-def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, parser: DemoParser):
+def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, player_death_event_df: DataFrame, player_death_tick_df: DataFrame):
     team_uuids[None] = None
 
-    deaths_df = parser.parse_event("player_death", player=["active_weapon_name", "team_name", "team_clan_name", "X", "Y", "Z"])
-    ticks_df = parser.parse_ticks(wanted_props=["is_alive", "team_name"], ticks=deaths_df["tick"].to_list())
+    # deaths_df = parser.parse_event("player_death", player=["active_weapon_name", "team_name", "team_clan_name", "X", "Y", "Z"])
+    # ticks_df = parser.parse_ticks(wanted_props=["is_alive", "team_name"], ticks=deaths_df["tick"].to_list())
 
     alive_dict = {}
 
-    for _, row in ticks_df.iterrows():
+    for _, row in player_death_tick_df.iterrows():
         if row['tick'] not in alive_dict:
             alive_dict[row['tick']] = {"CT": 0, "TERRORIST": 0}
 
@@ -61,7 +62,7 @@ def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, parser: DemoPar
 
     kills = []
 
-    for _, row in deaths_df.iterrows():
+    for _, row in player_death_event_df.iterrows():
         round_id = None
         for round in rounds:
             if row['tick'] > round.freeze_time_end_tick:
@@ -85,7 +86,7 @@ def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, parser: DemoPar
         trade = False
         traded = False
 
-        for _, row_2 in deaths_df.iterrows():
+        for _, row_2 in player_death_event_df.iterrows():
             if row['user_steamid'] == row_2['attacker_steamid'] and row['tick'] - row_2['tick'] > 0 and row['tick'] - row_2['tick'] < (5 * 64):
                 trade = True
 

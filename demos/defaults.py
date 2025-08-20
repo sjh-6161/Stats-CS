@@ -1,8 +1,9 @@
 from demoparser2 import DemoParser
 from data import *
 import json
+from pandas import DataFrame
 
-def parse(rounds: List[Round], demo_teams: dict, match_id: UUID, map_name: str, parser: DemoParser):
+def parse(rounds: List[Round], demo_teams: dict, match_id: UUID, map_name: str, default_df: DataFrame):
     with open('place_names.json', 'r') as file:
         place_names = json.load(file)
 
@@ -11,8 +12,8 @@ def parse(rounds: List[Round], demo_teams: dict, match_id: UUID, map_name: str, 
     for r in rounds:
         wanted_ticks.append(r.freeze_time_end_tick + 12 * 64)
 
-    positions_df = parser.parse_ticks(ticks=wanted_ticks, wanted_props=['last_place_name', 'team_name', 'team_clan_name', 'is_warmup_period']).sort_values(by='tick')
-    positions_df = positions_df[positions_df['is_warmup_period'] == False]
+    # positions_df = parser.parse_ticks(ticks=wanted_ticks, wanted_props=['last_place_name', 'team_name', 'team_clan_name', 'is_warmup_period']).sort_values(by='tick')
+    positions_df = default_df[default_df['is_warmup_period'] == False]
 
     current_defaults = {"CT": {"A": 0, "Mid": 0, "B": 0, "Team": ""}, "TERRORIST": {"A": 0, "Mid": 0, "B": 0, "Team": ""}}
 

@@ -1,5 +1,5 @@
 from csc_api import bomb_plant_time
-from demos import round_times
+# from demos import round_times
 from data import DbConnection
 from parse import parse_many_demos, reparse_many_demos
 from sequential_uuids.generators import uuid_time_nextval as uuid
@@ -18,11 +18,13 @@ if __name__ == "__main__":
     # drop table grenade;
     # drop table kill;
     # drop table message;
+    # drop table plant;
     # drop table tournament_team;
     # drop table player;
     # drop table round;
     # drop table match;
     # drop table team;
+    
 
     # Connect to postgres database. Initializes tables in database if needed
     connection = DbConnection()
