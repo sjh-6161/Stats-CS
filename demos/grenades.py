@@ -131,6 +131,7 @@ def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, parser: DemoPar
     #     ))
 
     # Go back and get the team and team clan names for the players who threw the grenades
+    # I think this is still slowish
     ticks = []
 
     for g in grenades:
@@ -138,12 +139,10 @@ def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, parser: DemoPar
 
     ticks_df = parser.parse_ticks(wanted_props=["team_name", "team_clan_name"], ticks=ticks)
 
-    for _, row in ticks_df.iterrows():
-        for g in grenades:
-            if str(row['steamid']) == g.player_id and row['tick'] == g.start_tick:
-                g.team_id = team_uuids[row['team_clan_name']]
-                g.team = row['team_name']
+    for g in grenades:
+        row = ticks_df[(ticks_df['tick'] == g.start_tick) & (ticks_df["steamid"] == int(g.player_id))].reset_index()
 
-                break
-            
+        g.team_id = team_uuids[row.loc[0]['team_clan_name']]
+        g.team = row.loc[0]['team_name']
+
     return grenades

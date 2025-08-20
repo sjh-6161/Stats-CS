@@ -211,7 +211,7 @@ class Round(DbClass):
         return """
             CREATE TABLE IF NOT EXISTS round (
                 id uuid PRIMARY KEY,
-                match_id uuid NOT NULL REFERENCES match(id),
+                match_id uuid NOT NULL REFERENCES match(id) ON DELETE CASCADE,
                 freeze_time_end_tick int NOT NULL,
                 end_official_tick int NOT NULL,
                 round_end_reason varchar(255) NOT NULL,
@@ -259,8 +259,8 @@ class Plant(DbClass):
         return """
             CREATE TABLE IF NOT EXISTS plant (
                 id uuid PRIMARY KEY,
-                match_id uuid NOT NULL REFERENCES match(id),
-                round_id uuid NOT NULL REFERENCES round(id),
+                match_id uuid NOT NULL REFERENCES match(id) ON DELETE CASCADE,
+                round_id uuid NOT NULL REFERENCES round(id) ON DELETE CASCADE,
                 tick int NOT NULL,
                 site VARCHAR(2) NOT NULL,
                 x float NOT NULL,
@@ -386,8 +386,8 @@ class Kill(DbClass):
         return """
             CREATE TABLE IF NOT EXISTS kill (
                 id uuid PRIMARY KEY,
-                match_id uuid NOT NULL REFERENCES match(id),
-                round_id uuid NOT NULL REFERENCES round(id),
+                match_id uuid NOT NULL REFERENCES match(id) ON DELETE CASCADE,
+                round_id uuid NOT NULL REFERENCES round(id) ON DELETE CASCADE,
                 assister_id VARCHAR(32) REFERENCES player(steam_id),
                 attacker_id VARCHAR(32) REFERENCES player(steam_id),
                 victim_id VARCHAR(32) REFERENCES player(steam_id),
@@ -493,8 +493,8 @@ class Damage(DbClass):
         return """
             CREATE TABLE IF NOT EXISTS damage (
                 id uuid PRIMARY KEY,
-                match_id uuid NOT NULL REFERENCES match(id),
-                round_id uuid NOT NULL REFERENCES round(id),
+                match_id uuid NOT NULL REFERENCES match(id) ON DELETE CASCADE,
+                round_id uuid NOT NULL REFERENCES round(id) ON DELETE CASCADE,
                 attacker_id VARCHAR(32) REFERENCES player(steam_id),
                 victim_id VARCHAR(32) NOT NULL REFERENCES player(steam_id),
                 attacker_x float,
@@ -548,8 +548,8 @@ class TeamDefault(DbClass):
         return """
             CREATE TABLE IF NOT EXISTS team_default (
                 id uuid PRIMARY KEY,
-                match_id uuid NOT NULL REFERENCES match(id),
-                round_id uuid NOT NULL REFERENCES round(id),
+                match_id uuid NOT NULL REFERENCES match(id) ON DELETE CASCADE,
+                round_id uuid NOT NULL REFERENCES round(id) ON DELETE CASCADE,
                 team_id uuid NOT NULL REFERENCES team(id),
                 side VARCHAR(32) NOT NULL,
                 num_a int NOT NULL,
@@ -606,8 +606,8 @@ class WeaponFire(DbClass):
         return """
             CREATE TABLE IF NOT EXISTS weapon_fire (
                 id uuid PRIMARY KEY,
-                match_id uuid NOT NULL REFERENCES match(id),
-                round_id uuid NOT NULL REFERENCES round(id),
+                match_id uuid NOT NULL REFERENCES match(id) ON DELETE CASCADE,
+                round_id uuid NOT NULL REFERENCES round(id) ON DELETE CASCADE,
                 attacker_id VARCHAR(32) REFERENCES player(steam_id),
                 attacker_x float NOT NULL,
                 attacker_y float NOT NULL,
@@ -655,8 +655,8 @@ class Buy(DbClass):
             CREATE TABLE IF NOT EXISTS buy (
                 id uuid PRIMARY KEY,
                 player_id VARCHAR(500) NOT NULL REFERENCES player(steam_id),
-                round_id uuid NOT NULL REFERENCES round(id),
-                match_id uuid NOT NULL REFERENCES match(id),
+                round_id uuid NOT NULL REFERENCES round(id) ON DELETE CASCADE,
+                match_id uuid NOT NULL REFERENCES match(id) ON DELETE CASCADE,
                 team_id uuid NOT NULL REFERENCES team(id),
                 side VARCHAR(32) NOT NULL,
                 equipment_value int NOT NULL,
@@ -692,8 +692,8 @@ class Message(DbClass):
             CREATE TABLE IF NOT EXISTS message (
                 id uuid PRIMARY KEY,
                 player_id VARCHAR(32) NOT NULL REFERENCES player(steam_id),
-                round_id uuid NOT NULL REFERENCES round(id),
-                match_id uuid NOT NULL REFERENCES match(id),
+                round_id uuid NOT NULL REFERENCES round(id) ON DELETE CASCADE,
+                match_id uuid NOT NULL REFERENCES match(id) ON DELETE CASCADE,
                 message VARCHAR(255),
                 tick int NOT NULL
             );
@@ -755,8 +755,8 @@ class Grenade(DbClass):
                 id uuid PRIMARY KEY,
                 player_id VARCHAR(32) NOT NULL REFERENCES player(steam_id),
                 team_id uuid NOT NULL REFERENCES team(id),
-                round_id uuid NOT NULL REFERENCES round(id),
-                match_id uuid NOT NULL REFERENCES match(id),
+                round_id uuid NOT NULL REFERENCES round(id) ON DELETE CASCADE,
+                match_id uuid NOT NULL REFERENCES match(id) ON DELETE CASCADE,
                 team VARCHAR(32) NOT NULL,
                 grenade_type VARCHAR(32) NOT NULL,
                 start_tick int NOT NULL,

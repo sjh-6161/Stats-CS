@@ -8,6 +8,7 @@ def parse(rounds: List[Round], match_id: UUID, chat_message_df: DataFrame):
     message_objects = []
 
     if isinstance(chat_message_df, list): return []
+    if chat_message_df is None: return []
 
     for _, row in chat_message_df.iterrows():
         round_id = None
