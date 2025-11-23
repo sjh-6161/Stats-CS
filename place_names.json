@@ -174,5 +174,33 @@
         "ElectricalBox": "A",
         "Connector": "A",
         "TSpawn": "None"    
+    },
+    "de_overpass": {
+        "TStart": "None",
+        "TSpawn": "None",
+        "TStairs": "None",
+        "Tunnels": "Mid",
+        "Connector": "Mid",
+        "Water": "B",
+        "Pipe": "B",
+        "Canal": "B",
+        "Alley": "B",
+        "SideAlley": "B",
+        "BombsiteB": "B",
+        "Construction": "B",
+        "Bridge": "B",
+        "Walkway": "B",
+        "UnderA": "B",
+        "SnipersNest": "B",
+        "StorageRoom": "None",
+        "Stairs": "None",
+        "BackofA": "A",
+        "Lobby": "A",
+        "BombsiteA": "A",
+        "LowerPark": "A",
+        "Restroom": "A",
+        "UpperPark": "A",
+        "Fountain": "A",
+        "Playground": "A"
     }
 }
