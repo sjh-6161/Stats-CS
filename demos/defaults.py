@@ -47,7 +47,7 @@ def parse(rounds: List[Round], demo_teams: dict, match_id: UUID, map_name: str, 
             if row['tick'] > round.freeze_time_end_tick:
                 round_id = round.id
 
-        if round_id == None or row['team_name'] == None: continue
+        if round_id == None or row['team_name'] == None or row['last_place_name'] == '': continue
 
         if current_tick == -1: current_tick = row['tick']
 
