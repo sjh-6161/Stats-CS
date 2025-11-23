@@ -4,11 +4,14 @@ import os
 import gspread
 from google.oauth2.service_account import Credentials
 from python_graphql_client import GraphqlClient
+from dotenv import load_dotenv
 
 seasons = [
     14,
     15,
-    16
+    16,
+    17,
+    18
 ]
 
 types = [
@@ -26,16 +29,16 @@ tiers = [
     "Premier"
 ]
 
-queries = {
-    "clean-kd.sql": "Clean KD",
-    "good-kill-bad-death.sql": "GKBD",
-    "grenade-deaths.sql": "Grenade Deaths",
-    "kill-distance.sql": "Kill Distance",
-    "meme-kd.sql": "Meme KD",
-    "weapon-kds.sql": "Weapon KDs",
-    "no-buy-pistols.sql": "No Buy Pistols",
-    "gg-rate.sql": "GGR"
-}
+# queries = {
+#     "clean-kd.sql": "Clean KD",
+#     "good-kill-bad-death.sql": "GKBD",
+#     "grenade-deaths.sql": "Grenade Deaths",
+#     "kill-distance.sql": "Kill Distance",
+#     "meme-kd.sql": "Meme KD",
+#     "weapon-kds.sql": "Weapon KDs",
+#     "no-buy-pistols.sql": "No Buy Pistols",
+#     "gg-rate.sql": "GGR"
+# }
 
 def get_combined_stats():
     stats_client = GraphqlClient(endpoint="https://stats.csconfederation.com/graphql")
@@ -85,9 +88,11 @@ def get_combined_stats():
 
 if __name__ == "__main__":
     # Postgres connection
+    load_dotenv()
+
     connection = psycopg2.connect(
         host=os.getenv("POSTGRES_HOST"),
-        port=5433,
+        port=os.getenv("POSTGRES_PORT"),
         database=os.getenv("POSTGRES_DATABASE"),
         user=os.getenv("POSTGRES_USER"),
         password=os.getenv("POSTGRES_PASSWORD"),
@@ -111,19 +116,21 @@ if __name__ == "__main__":
 
     print("Succesfully Updated Combined Stats")
     
-    for file in queries.keys():
-        with open(f"./query-to-sheets/{file}", 'r') as q:
-            query = q.read()
+    file = "aggregate.sql"
 
-        with connection.cursor() as cur:
-            cur.execute(query)
+    with open(f"./query-to-sheets/{file}", 'r') as q:
+        query = q.read()
 
-            colnames = [desc[0] for desc in cur.description]
-            data = cur.fetchall()
+    with connection.cursor() as cur:
+        cur.execute(query)
 
-        worksheet_names_dict[queries[file]].update([colnames], "A1")
-        worksheet_names_dict[queries[file]].update(data, "A2")
+        colnames = [desc[0] for desc in cur.description]
+        data = cur.fetchall()
 
-        print(f"Succesfully Updated {queries[file]}")
+    worksheet_names_dict["Custom Stats"].clear()
+    worksheet_names_dict["Custom Stats"].update([colnames], "A1")
+    worksheet_names_dict["Custom Stats"].update(data, "A2")
+
+    print(f"Succesfully Updated Custom Stats")
 
     
