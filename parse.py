@@ -118,12 +118,12 @@ def parse_many_demos(tournament: str, folder_path: str, connection: DbConnection
 
         try:
             required_events = ["round_freeze_end", "player_hurt", "player_death", "chat_message", "bomb_planted", "round_officially_ended", "cs_win_panel_match", "weapon_fire"]
-            player_event_props = ["team_name", "team_clan_name", "X", "Y", "Z", "active_weapon_name", "which_bomb_zone", "pitch", "yaw"]
+            player_event_props = ["team_name", "team_clan_name", "X", "Y", "Z", "active_weapon_name", "which_bomb_zone", "pitch", "yaw", "last_place_name"]
             other_event_props = ["team_rounds_total", "round_win_reason", "round_in_progress", "is_warmup_period"]
 
-            player_grenade_props = ["team_name", "team_clan_name"]
+            player_grenade_props = ["team_name", "team_clan_name", "last_place_name"]
 
-            player_tick_props = ["current_equip_value", "balance", "team_clan_name", "team_name", "last_place_name", "is_warmup_period", "is_alive"]
+            player_tick_props = ["current_equip_value", "balance", "team_clan_name", "team_name", "last_place_name", "is_warmup_period", "is_alive", "X", "Y", "Z"]
 
 
             all_events = parser.parse_events(event_name=required_events, player=player_event_props, other=other_event_props)
@@ -187,20 +187,20 @@ def parse_many_demos(tournament: str, folder_path: str, connection: DbConnection
             # current_time =  datetime.datetime.now(); print(f"Defaults: {current_time - time}"); time = current_time
 
             # Parse kills
-            kill_objects = kills.parse(round_objects, team_uuids, match_id, player_death_event_df, player_death_tick_df)
+            kill_objects = kills.parse(round_objects, team_uuids, match_id, match.map, player_death_event_df, player_death_tick_df)
             # current_time =  datetime.datetime.now(); print(f"Kills: {current_time - time}"); time = current_time
 
             # Parse round eq vals and balances
             buy_objects = buys.parse(round_objects, team_uuids, match_id, freeze_time_end_df)
             # current_time =  datetime.datetime.now(); print(f"Buys: {current_time - time}"); time = current_time
 
-            damage_objects = damages.parse(round_objects, match_id, player_hurt_df)
+            damage_objects = damages.parse(round_objects, match_id, match.map, player_hurt_df)
             # current_time =  datetime.datetime.now(); print(f"Damages: {current_time - time}"); time = current_time
 
-            weapon_fire_objects = weapon_fires.parse(round_objects, match_id, weapon_fire_df)
+            weapon_fire_objects = weapon_fires.parse(round_objects, match_id, match.map, weapon_fire_df)
             # current_time =  datetime.datetime.now(); print(f"Weapon Fires: {current_time - time}"); time = current_time
 
-            grenade_objects = grenades.parse(round_objects, team_uuids, match_id, parser, grenades_df)
+            grenade_objects = grenades.parse(round_objects, team_uuids, match_id, match.map, parser, grenades_df)
             # current_time =  datetime.datetime.now(); print(f"Grenades: {current_time - time}"); time = current_time
 
             # Parse chat messages

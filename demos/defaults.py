@@ -3,72 +3,53 @@ from data import *
 import json
 from pandas import DataFrame
 
+def get_zone(place_names: dict, map_name: str, last_place_name: str) -> str:
+    """Get the zone for a place name, returning None if not found or if zone is 'None'."""
+    if not last_place_name or last_place_name == '':
+        return None
+
+    if map_name not in place_names:
+        return None
+
+    if last_place_name not in place_names[map_name]:
+        return None
+
+    zone = place_names[map_name][last_place_name]
+
+    if zone == "None":
+        return None
+
+    return zone
+
 def parse(rounds: List[Round], demo_teams: dict, match_id: UUID, map_name: str, default_df: DataFrame):
     with open('place_names.json', 'r') as file:
         place_names = json.load(file)
 
-    wanted_ticks = []
-
-    for r in rounds:
-        wanted_ticks.append(r.freeze_time_end_tick + 12 * 64)
-
-    # positions_df = parser.parse_ticks(ticks=wanted_ticks, wanted_props=['last_place_name', 'team_name', 'team_clan_name', 'is_warmup_period']).sort_values(by='tick')
     positions_df = default_df[default_df['is_warmup_period'] == False]
-
-    current_defaults = {"CT": {"A": 0, "Mid": 0, "B": 0, "Team": ""}, "TERRORIST": {"A": 0, "Mid": 0, "B": 0, "Team": ""}}
-
-    current_tick = -1
 
     defaults = []
 
-    round_id = None
-
     for _, row in positions_df.iterrows():
-        if current_tick == -1: current_tick = row['tick']
-
-        if row['tick'] != current_tick:
-            current_tick = row['tick']
-
-            for side in ["CT", "TERRORIST"]:
-                defaults.append(TeamDefault(
-                    match_id=match_id,
-                    round_id=round_id,
-                    team_id=demo_teams[current_defaults[side]["Team"]],
-                    side=side,
-                    num_a=current_defaults[side]["A"],
-                    num_b=current_defaults[side]["B"],
-                    num_mid=current_defaults[side]["Mid"],
-                ))
-            
-            current_defaults = {"CT": {"A": 0, "Mid": 0, "B": 0, "Team": ""}, "TERRORIST": {"A": 0, "Mid": 0, "B": 0, "Team": ""}}
-
         round_id = None
         for round in rounds:
             if row['tick'] > round.freeze_time_end_tick:
                 round_id = round.id
 
-        if round_id == None or row['team_name'] == None or row['last_place_name'] == '': continue
+        if round_id is None or row['team_name'] is None:
+            continue
 
-        if current_tick == -1: current_tick = row['tick']
+        zone = get_zone(place_names, map_name, row['last_place_name'])
 
-        if current_defaults[row['team_name']]["Team"] == "":
-            current_defaults[row['team_name']]["Team"] = row['team_clan_name']
-
-        side = place_names[map_name][row['last_place_name']]
-
-        if side == "None": continue
-
-        current_defaults[row['team_name']][side] += 1
-
-    for side in ["CT", "TERRORIST"]:
-        defaults.append(TeamDefault(
+        defaults.append(PlayerDefault(
             match_id=match_id,
             round_id=round_id,
-            team_id=demo_teams[current_defaults[side]["Team"]],
-            side=side,
-            num_a=current_defaults[side]["A"],
-            num_b=current_defaults[side]["B"],
-            num_mid=current_defaults[side]["Mid"],
+            player_id=str(row['steamid']),
+            team_id=demo_teams[row['team_clan_name']],
+            side=row['team_name'],
+            x=row['X'],
+            y=row['Y'],
+            z=row['Z'],
+            zone=zone,
         ))
 
     return defaults

@@ -281,9 +281,11 @@ class Kill(DbClass):
     attacker_x: float
     attacker_y: float
     attacker_z: float
+    attacker_zone: str
     victim_x: float
     victim_y: float
     victim_z: float
+    victim_zone: str
     assistedflash: bool
     attackerblind: bool
     attackerinair: bool
@@ -319,9 +321,11 @@ class Kill(DbClass):
         attacker_x: float,
         attacker_y: float,
         attacker_z: float,
+        attacker_zone: str,
         victim_x: float,
         victim_y: float,
         victim_z: float,
+        victim_zone: str,
         assistedflash: bool,
         attackerblind: bool,
         attackerinair: bool,
@@ -356,9 +360,11 @@ class Kill(DbClass):
         self.attacker_x = attacker_x
         self.attacker_y = attacker_y
         self.attacker_z = attacker_z
+        self.attacker_zone = attacker_zone
         self.victim_x = victim_x
         self.victim_y = victim_y
         self.victim_z = victim_z
+        self.victim_zone = victim_zone
         self.assistedflash = assistedflash
         self.attackerblind = attackerblind
         self.attackerinair = attackerinair
@@ -397,9 +403,11 @@ class Kill(DbClass):
                 attacker_x float,
                 attacker_y float,
                 attacker_z float,
+                attacker_zone VARCHAR(32),
                 victim_x float NOT NULL,
                 victim_y float NOT NULL,
                 victim_z float NOT NULL,
+                victim_zone VARCHAR(32),
                 assistedflash bool NOT NULL,
                 attackerblind bool NOT NULL,
                 attackerinair bool NOT NULL,
@@ -432,9 +440,11 @@ class Damage(DbClass):
     attacker_x: float
     attacker_y: float
     attacker_z: float
+    attacker_zone: str
     victim_x: float
     victim_y: float
     victim_z: float
+    victim_zone: str
     armor: int
     health: int
     dmg_armor: int
@@ -454,9 +464,11 @@ class Damage(DbClass):
         attacker_x: float,
         attacker_y: float,
         attacker_z: float,
+        attacker_zone: str,
         victim_x: float,
         victim_y: float,
         victim_z: float,
+        victim_zone: str,
         armor: int,
         health: int,
         dmg_armor: int,
@@ -475,9 +487,11 @@ class Damage(DbClass):
         self.attacker_x = attacker_x
         self.attacker_y = attacker_y
         self.attacker_z = attacker_z
+        self.attacker_zone = attacker_zone
         self.victim_x = victim_x
         self.victim_y = victim_y
         self.victim_z = victim_z
+        self.victim_zone = victim_zone
         self.armor = armor
         self.health = health
         self.dmg_armor = dmg_armor
@@ -500,9 +514,11 @@ class Damage(DbClass):
                 attacker_x float,
                 attacker_y float,
                 attacker_z float,
+                attacker_zone VARCHAR(32),
                 victim_x float NOT NULL,
                 victim_y float NOT NULL,
                 victim_z float NOT NULL,
+                victim_zone VARCHAR(32),
                 armor int NOT NULL,
                 health int NOT NULL,
                 dmg_armor int NOT NULL,
@@ -515,46 +531,54 @@ class Damage(DbClass):
             );
         """
     
-class TeamDefault(DbClass):
+class PlayerDefault(DbClass):
     match_id: UUID
     round_id: UUID
+    player_id: str
     team_id: UUID
     side: str
-    num_a: int
-    num_b: int
-    num_mid: int
+    x: float
+    y: float
+    z: float
+    zone: str
 
     def __init__(
-        self, 
+        self,
         match_id: UUID,
         round_id: UUID,
+        player_id: str,
         team_id: UUID,
         side: str,
-        num_a: int,
-        num_b: int,
-        num_mid: int,
+        x: float,
+        y: float,
+        z: float,
+        zone: str,
         id: Optional[UUID] = None,
     ) -> None:
         self.match_id = match_id
         self.round_id = round_id
+        self.player_id = player_id
         self.team_id = team_id
         self.side = side
-        self.num_a = num_a
-        self.num_b = num_b
-        self.num_mid = num_mid
+        self.x = x
+        self.y = y
+        self.z = z
+        self.zone = zone
         super().__init__(id)
 
     def to_create() -> str:
         return """
-            CREATE TABLE IF NOT EXISTS team_default (
+            CREATE TABLE IF NOT EXISTS player_default (
                 id uuid PRIMARY KEY,
                 match_id uuid NOT NULL REFERENCES match(id) ON DELETE CASCADE,
                 round_id uuid NOT NULL REFERENCES round(id) ON DELETE CASCADE,
+                player_id VARCHAR(32) NOT NULL REFERENCES player(steam_id),
                 team_id uuid NOT NULL REFERENCES team(id),
                 side VARCHAR(32) NOT NULL,
-                num_a int NOT NULL,
-                num_b int NOT NULL,
-                num_mid int NOT NULL
+                x float NOT NULL,
+                y float NOT NULL,
+                z float NOT NULL,
+                zone VARCHAR(32)
             );
         """
     
@@ -565,6 +589,7 @@ class WeaponFire(DbClass):
     attacker_x: float
     attacker_y: float
     attacker_z: float
+    attacker_zone: str
     attacker_pitch: float
     attacker_yaw: float
     attacker_team: str
@@ -573,13 +598,14 @@ class WeaponFire(DbClass):
     silenced: bool
 
     def __init__(
-        self, 
+        self,
         match_id: UUID,
         round_id: UUID,
         attacker_id: str,
         attacker_x: float,
         attacker_y: float,
         attacker_z: float,
+        attacker_zone: str,
         attacker_pitch: float,
         attacker_yaw: float,
         attacker_team: str,
@@ -594,6 +620,7 @@ class WeaponFire(DbClass):
         self.attacker_x = attacker_x
         self.attacker_y = attacker_y
         self.attacker_z = attacker_z
+        self.attacker_zone = attacker_zone
         self.attacker_pitch = attacker_pitch
         self.attacker_yaw = attacker_yaw
         self.attacker_team = attacker_team
@@ -612,6 +639,7 @@ class WeaponFire(DbClass):
                 attacker_x float NOT NULL,
                 attacker_y float NOT NULL,
                 attacker_z float NOT NULL,
+                attacker_zone VARCHAR(32),
                 attacker_pitch float NOT NULL,
                 attacker_yaw float NOT NULL,
                 attacker_team VARCHAR(255) NOT NULL,
@@ -710,10 +738,12 @@ class Grenade(DbClass):
     start_x: float
     start_y: float
     start_z: float
+    start_zone: str
     end_tick: int
     end_x: float
     end_y: float
     end_z: float
+    end_zone: str
 
     def __init__(
         self,
@@ -727,10 +757,12 @@ class Grenade(DbClass):
         start_x: float,
         start_y: float,
         start_z: float,
+        start_zone: str,
         end_tick: int,
         end_x: float,
         end_y: float,
         end_z: float,
+        end_zone: str,
         id: Optional[UUID] = None,
     ) -> None:
         self.player_id = player_id
@@ -743,12 +775,14 @@ class Grenade(DbClass):
         self.start_x = start_x
         self.start_y = start_y
         self.start_z = start_z
+        self.start_zone = start_zone
         self.end_tick = end_tick
         self.end_x = end_x
         self.end_y = end_y
         self.end_z = end_z
+        self.end_zone = end_zone
         super().__init__(id)
-        
+
     def to_create() -> str:
         return """
             CREATE TABLE IF NOT EXISTS grenade (
@@ -763,10 +797,12 @@ class Grenade(DbClass):
                 start_x float NOT NULL,
                 start_y float NOT NULL,
                 start_z float NOT NULL,
+                start_zone VARCHAR(32),
                 end_tick int NOT NULL,
                 end_x float NOT NULL,
                 end_y float NOT NULL,
-                end_z float NOT NULL
+                end_z float NOT NULL,
+                end_zone VARCHAR(32)
             );
         """
     
@@ -788,7 +824,7 @@ class DbConnection:
             Player.to_create(),
             Match.to_create(),
             Round.to_create(),
-            TeamDefault.to_create(),
+            PlayerDefault.to_create(),
             Kill.to_create(),
             Buy.to_create(),
             Damage.to_create(),

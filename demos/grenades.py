@@ -1,10 +1,32 @@
 from demoparser2 import DemoParser
 from data import *
 from pandas import DataFrame
+import json
 
-def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, parser: DemoParser, grenades_df: DataFrame):
+def get_zone(place_names: dict, map_name: str, last_place_name: str) -> str:
+    """Get the zone for a place name, returning None if not found or if zone is 'None'."""
+    if not last_place_name or last_place_name == '':
+        return None
+
+    if map_name not in place_names:
+        return None
+
+    if last_place_name not in place_names[map_name]:
+        return None
+
+    zone = place_names[map_name][last_place_name]
+
+    if zone == "None":
+        return None
+
+    return zone
+
+def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, map_name: str, parser: DemoParser, grenades_df: DataFrame):
     # grenades_df = parser.parse_grenades(grenades=False, extra=["team_name", "team_clan_name"])
     # grenades_df = grenades_df.drop_duplicates(subset=["grenade_entity_id"])
+
+    with open('place_names.json', 'r') as file:
+        place_names = json.load(file)
 
     # {0: {"steamid": 0000, "variant": "flashbang", "start": {"tick": 0, "x": 0.0, "y": 0.0, "z": 0.0}, "end": {"tick": 0, "x": 0.0, "y": 0.0, "z": 0.0}}
     active_grenades = {}
@@ -34,6 +56,9 @@ def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, parser: DemoPar
 
         if round_id == None: continue
 
+        start_zone = get_zone(place_names, map_name, start_rows.loc[i]["last_place_name"] if "last_place_name" in start_rows.columns else None)
+        end_zone = get_zone(place_names, map_name, end_rows.loc[i]["last_place_name"] if "last_place_name" in end_rows.columns else None)
+
         grenades.append(Grenade(
             player_id=str(start_rows.loc[i]["steamid"]),
             team_id=None,
@@ -45,10 +70,12 @@ def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, parser: DemoPar
             start_x=float(start_rows.loc[i]["x"]),
             start_y=float(start_rows.loc[i]["y"]),
             start_z=float(start_rows.loc[i]["z"]),
+            start_zone=start_zone,
             end_tick=int(end_rows.loc[i]["tick"]),
             end_x=float(end_rows.loc[i]["x"]),
             end_y=float(end_rows.loc[i]["y"]),
             end_z=float(end_rows.loc[i]["z"]),
+            end_zone=end_zone,
         ))
 
     # exit(0)

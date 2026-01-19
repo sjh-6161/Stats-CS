@@ -1,6 +1,25 @@
 from demoparser2 import DemoParser
 from data import *
 from pandas import DataFrame
+import json
+
+def get_zone(place_names: dict, map_name: str, last_place_name: str) -> str:
+    """Get the zone for a place name, returning None if not found or if zone is 'None'."""
+    if not last_place_name or last_place_name == '':
+        return None
+
+    if map_name not in place_names:
+        return None
+
+    if last_place_name not in place_names[map_name]:
+        return None
+
+    zone = place_names[map_name][last_place_name]
+
+    if zone == "None":
+        return None
+
+    return zone
 
 WEAPON_NAME_MAPPING = {
     "Smoke Grenade": "smokegrenade",
@@ -45,8 +64,11 @@ WEAPON_NAME_MAPPING = {
     "SSG 08": "ssg08"
 }
 
-def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, player_death_event_df: DataFrame, player_death_tick_df: DataFrame):
+def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, map_name: str, player_death_event_df: DataFrame, player_death_tick_df: DataFrame):
     team_uuids[None] = None
+
+    with open('place_names.json', 'r') as file:
+        place_names = json.load(file)
 
     # deaths_df = parser.parse_event("player_death", player=["active_weapon_name", "team_name", "team_clan_name", "X", "Y", "Z"])
     # ticks_df = parser.parse_ticks(wanted_props=["is_alive", "team_name"], ticks=deaths_df["tick"].to_list())
@@ -93,6 +115,9 @@ def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, player_death_ev
             if row['attacker_steamid'] == row_2['user_steamid'] and row_2['tick'] - row['tick'] > 0 and row_2['tick'] - row['tick'] < (5 * 64):
                 traded = True
 
+        attacker_zone = get_zone(place_names, map_name, row['attacker_last_place_name'])
+        victim_zone = get_zone(place_names, map_name, row['user_last_place_name'])
+
         kills.append(Kill(
             match_id=match_id,
             round_id=round_id,
@@ -105,9 +130,11 @@ def parse(rounds: List[Round], team_uuids: dict, match_id: UUID, player_death_ev
             attacker_x=row['attacker_X'],
             attacker_y=row['attacker_Y'],
             attacker_z=row['attacker_Z'],
+            attacker_zone=attacker_zone,
             victim_x=row['user_X'],
             victim_y=row['user_Y'],
             victim_z=row['user_Z'],
+            victim_zone=victim_zone,
             assistedflash=row['assistedflash'],
             attackerblind=row['attackerblind'],
             attackerinair=row['attackerinair'],
