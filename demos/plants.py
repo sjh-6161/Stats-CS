@@ -12,6 +12,8 @@ def parse(rounds: List[Round], match_id: UUID, bomb_planted_df: DataFrame):
 
     plants = []
 
+    if bomb_planted_df is None: return
+
     for _, row in bomb_planted_df.iterrows():
         round_id = None
         for round in rounds:

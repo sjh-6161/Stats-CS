@@ -11,7 +11,8 @@ seasons = [
     15,
     16,
     17,
-    18
+    18,
+    19
 ]
 
 types = [
@@ -60,6 +61,7 @@ def get_combined_stats():
                             awpR
                             odr
                             odaR
+                            consistency
                         }
                     }
                 """
@@ -81,7 +83,8 @@ def get_combined_stats():
                         entry["util"],
                         entry["awpR"],
                         entry["odr"],
-                        entry["odaR"]
+                        entry["odaR"],
+                        entry["consistency"]
                     ])
 
     worksheet_names_dict["Combined"].update(stats_array, "B2")

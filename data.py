@@ -68,33 +68,6 @@ class Team(DbClass):
             );
             """
     
-class TournamentTeam(DbClass):
-    player_id: str
-    team_id: UUID
-    tournament_name: str
-
-    def __init__(
-        self,
-        player_id: str,
-        team_id: UUID,
-        tournament_name: str,
-        id: Optional[UUID] = None
-    ) -> None:
-        super().__init__(id)
-        self.player_id = player_id
-        self.team_id = team_id
-        self.tournament_name = tournament_name
-
-    def to_create() -> str:
-        return """
-            CREATE TABLE IF NOT EXISTS tournament_team (
-                id uuid PRIMARY KEY,
-                player_id VARCHAR(500) REFERENCES player(steam_id),
-                team_id uuid REFERENCES team(id),
-                tournament_name varchar(500) NOT NULL
-            );
-        """
-
 class Player(DbClass):
     steam_id: str
     name: str
@@ -134,6 +107,8 @@ class Match(DbClass):
     map: str
     file: str
     tournament: str
+    stage: str
+    season: int
 
     def __init__(
         self,
@@ -142,6 +117,8 @@ class Match(DbClass):
         map: str,
         file: str,
         tournament: str,
+        stage: str,
+        season: int,
         id: Optional[UUID] = None,
     ) -> None:
         self.team_one_id = team_one_id
@@ -149,6 +126,8 @@ class Match(DbClass):
         self.map = map
         self.file = file
         self.tournament = tournament
+        self.stage = stage
+        self.season = season
         super().__init__(id)
 
     def to_create() -> str:
@@ -159,7 +138,9 @@ class Match(DbClass):
                 team_two_id uuid NOT NULL REFERENCES team(id),
                 map varchar(100) NOT NULL,
                 file varchar(500) NOT NULL,
-                tournament varchar(500) NOT NULL
+                tournament varchar(500) NOT NULL,
+                stage varchar(500) NOT NULL,
+                season int NOT NULL
             );
             """
 
@@ -537,9 +518,6 @@ class PlayerDefault(DbClass):
     player_id: str
     team_id: UUID
     side: str
-    x: float
-    y: float
-    z: float
     zone: str
 
     def __init__(
@@ -549,9 +527,6 @@ class PlayerDefault(DbClass):
         player_id: str,
         team_id: UUID,
         side: str,
-        x: float,
-        y: float,
-        z: float,
         zone: str,
         id: Optional[UUID] = None,
     ) -> None:
@@ -560,9 +535,6 @@ class PlayerDefault(DbClass):
         self.player_id = player_id
         self.team_id = team_id
         self.side = side
-        self.x = x
-        self.y = y
-        self.z = z
         self.zone = zone
         super().__init__(id)
 
@@ -575,9 +547,6 @@ class PlayerDefault(DbClass):
                 player_id VARCHAR(32) NOT NULL REFERENCES player(steam_id),
                 team_id uuid NOT NULL REFERENCES team(id),
                 side VARCHAR(32) NOT NULL,
-                x float NOT NULL,
-                y float NOT NULL,
-                z float NOT NULL,
                 zone VARCHAR(32)
             );
         """
@@ -806,15 +775,47 @@ class Grenade(DbClass):
             );
         """
     
+class FailedDemo(DbClass):
+    file: str
+    s3_key: str
+    error: str
+    parser_version: int
+
+    def __init__(
+        self,
+        file: str,
+        s3_key: str,
+        error: str,
+        parser_version: int,
+        id: Optional[UUID] = None,
+    ) -> None:
+        self.file = file
+        self.s3_key = s3_key
+        self.error = error
+        self.parser_version = parser_version
+        super().__init__(id)
+
+    def to_create() -> str:
+        return """
+            CREATE TABLE IF NOT EXISTS failed_demo (
+                id uuid PRIMARY KEY,
+                file VARCHAR(500) NOT NULL,
+                s3_key VARCHAR(500) NOT NULL,
+                error TEXT NOT NULL,
+                parser_version INT NOT NULL,
+                UNIQUE(file, parser_version)
+            );
+        """
+
 class DbConnection:
-    def __init__(self) -> None:
+    def __init__(self, database: Optional[str] = None) -> None:
         # Enable UUIDS
         extras.register_uuid()
 
         self.__connection = psycopg2.connect(
             host=os.getenv("POSTGRES_HOST"),
             port=os.getenv("POSTGRES_PORT"),
-            database=os.getenv("POSTGRES_DATABASE"),
+            database=database or os.getenv("POSTGRES_DATABASE"),
             user=os.getenv("POSTGRES_USER"),
             password=os.getenv("POSTGRES_PASSWORD"),
         )
@@ -831,8 +832,8 @@ class DbConnection:
             WeaponFire.to_create(),
             Grenade.to_create(),
             Message.to_create(),
-            TournamentTeam.to_create(),
             Plant.to_create(),
+            FailedDemo.to_create(),
         ]
 
         # Create tables if they don't exist
@@ -857,6 +858,15 @@ class DbConnection:
             cur.execute("SELECT file, tournament, id FROM match;")
             return cur.fetchall()
         
+    def list_failed_demos(self, parser_version: int) -> set:
+        """
+        Returns set of .dem filenames that failed parsing at the given parser version
+        """
+
+        with self.__connection.cursor() as cur:
+            cur.execute("SELECT file FROM failed_demo WHERE parser_version = %s;", (parser_version,))
+            return {row[0] for row in cur.fetchall()}
+
     def list_teams(self) -> List[str]:
         """
         Returns all names of teams in the db

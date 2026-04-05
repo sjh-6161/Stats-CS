@@ -5,3 +5,5 @@
 **/__pycache__
 
 /demos_download
+
+query-to-sheets/sheets-api.json

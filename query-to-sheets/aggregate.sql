@@ -94,11 +94,32 @@ pistol_hs AS (
     WHERE (round.t_rounds + round.ct_rounds = 0 OR round.t_rounds + round.ct_rounds = 12) AND damage.hitgroup = 'head' AND damage.attacker_id IS NOT NULL
     GROUP BY damage.attacker_id, match.tournament
   ) t2 ON t1.attacker_id = t2.attacker_id AND t1.tournament = t2.tournament
+),
+clutch_1v1 AS (
+  SELECT player.steam_id, COALESCE(t1.tournament, t2.tournament) AS tournament,
+    CAST(COALESCE(t1.kills, 0) AS FLOAT) / (COALESCE(t1.kills, 0) + COALESCE(t2.deaths, 0)) AS clutch_kd_ratio
+  FROM (
+    SELECT kill.attacker_id, match.tournament, COUNT(kill.attacker_id) AS kills
+    FROM kill
+    INNER JOIN match ON match.id = kill.match_id
+    WHERE kill.t_alive + kill.ct_alive = 1
+    GROUP BY kill.attacker_id, match.tournament
+  ) t1 FULL OUTER JOIN (
+    SELECT kill.victim_id, match.tournament, COUNT(kill.victim_id) AS deaths
+    FROM kill
+    INNER JOIN match ON match.id = kill.match_id
+    WHERE kill.t_alive + kill.ct_alive = 1
+    GROUP BY kill.victim_id, match.tournament
+  ) t2 ON t1.attacker_id = t2.victim_id AND t1.tournament = t2.tournament
+  INNER JOIN player ON player.steam_id = COALESCE(t1.attacker_id, t2.victim_id)
+  WHERE (COALESCE(t1.kills, 0) + COALESCE(t2.deaths, 0)) >= 3
 )
-SELECT team_diff_stats.tournament, team_diff_stats.steam_id, team_diff_stats.name, team_diff_stats.diff, pistol_stats.pkd, pistol_hs.hsbs
+SELECT team_diff_stats.tournament, team_diff_stats.steam_id, team_diff_stats.name, team_diff_stats.diff, pistol_stats.pkd, pistol_hs.hsbs, clutch_1v1.clutch_kd_ratio
 FROM pistol_stats
 FULL OUTER JOIN team_diff_stats
 ON pistol_stats.steam_id = team_diff_stats.steam_id AND pistol_stats.tournament = team_diff_stats.tournament
 FULL OUTER JOIN pistol_hs
 ON pistol_stats.steam_id = pistol_hs.attacker_id AND pistol_stats.tournament = pistol_hs.tournament
+FULL OUTER JOIN clutch_1v1
+ON pistol_stats.steam_id = clutch_1v1.steam_id AND pistol_stats.tournament = clutch_1v1.tournament
 ORDER BY name

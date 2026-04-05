@@ -1,24 +1,27 @@
+import re
 import boto3
 from botocore import UNSIGNED
 from botocore.client import Config
+from botocore.exceptions import ClientError
 import zipfile
 import os
 
+def get_mid(filename):
+    match = re.search(r'mid\d+', filename)
+    return match.group() if match else None
+
 # s12/Combines/08-19/combine-challenger-mid1385-1_de_nuke-2023-08-20_03-22-48.dem.zip
 prefixes = [
-    's18/M01',
-    's18/M02',
-    's18/M03',
-    's18/M04',
-    's18/M05',
-    's18/M06',
-    's18/M07',
-    's18/M08',
-    's18/M09',
-    's18/M10',
-    's18/M11',
-    's18/M12',
-    's18/M13',
+    's19/M01',
+    's19/M02',
+    's19/M03',
+    's19/M04',
+    's19/M05',
+    's19/M06',
+    's19/M07',
+    's19/M08',
+    's19/M09',
+    's19/M10',
 ]
 
 for prefix in prefixes:
@@ -32,23 +35,30 @@ for prefix in prefixes:
 
     keys = [item['Key'] for item in response['Contents']]
 
-    existing_dems = os.listdir("D:\CSC\Season 18")
+    existing_dems = os.listdir("D:\CSC\Season 19")
 
-    for key in keys:
-        if "Scrim" in key: continue
-        if key[8:-4] in existing_dems: 
-            continue
+    existing_mids = {get_mid(f) for f in existing_dems}
 
-        filename = "D:/CSC/Season 18/" + '-'.join(key.split('/')[-2:])
-        print('now doing',filename)
+    for index, key in enumerate(keys):
+        try:
+            print(str(index) + "/" + str(len(keys)))
 
-        with open(filename, 'wb') as f:
-            client.download_fileobj('cscdemos', key, f)
+            if "Scrim" in key: continue
+            if get_mid(key) in existing_mids:
+                continue
+
+            filename = "D:/CSC/Season 19/" + '-'.join(key.split('/')[-2:])
+            print('now doing',filename)
+
+            with open(filename, 'wb') as f:
+                client.download_fileobj('cscdemos', key, f)
 
 
-        with zipfile.ZipFile(filename, 'r') as zf:
-            zf.extractall("D:/CSC/Season 18/")
+            with zipfile.ZipFile(filename, 'r') as zf:
+                zf.extractall("D:/CSC/Season 19/")
 
-        print(f"Successfully unzipped '{filename}' to D:/CSC/Season 18/")
+            print(f"Successfully unzipped '{filename}' to D:/CSC/Season 19/")
 
-        os.remove(filename)
+            os.remove(filename)
+        except ClientError as e:
+            print(e)
